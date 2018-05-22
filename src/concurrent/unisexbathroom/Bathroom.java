@@ -1,6 +1,6 @@
-package concorrentes.imd.ufrn;
+package concurrent.unisexbathroom;
 
-import java.util.ArrayList;
+import java.util.ArrayList; 
 import java.util.List; 
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -17,9 +17,14 @@ public class Bathroom {
 	private Condition unavailable;
 	private Condition available;
 	
-	public Bathroom() { 
+	BathroomLine line;
+	
+	public Bathroom(BathroomLine line) { 
 		this.sexOcupation = null;
 		this.bathroom_users = new ArrayList<Person>();
+		
+		this.line = line;
+		
 		this.block = new ReentrantLock();
 		this.unavailable = block.newCondition();
 		this.available = block.newCondition();
@@ -32,6 +37,7 @@ public class Bathroom {
 			while (!this.isAvailable(p.getGender())) {
 				System.out.println(p.getGender() + " person " + p.getName() + " tried get in");
 				System.out.println("The bathroom is full or unavailable");
+				
 				unavailable.await();
 			} 
 			
@@ -50,10 +56,9 @@ public class Bathroom {
 		}
 	}
 	
-	public void getout(Person p) { 
+	public synchronized void getout(Person p) { 
 		block.lock();
-		try {
-
+		try { 
 			while (this.isAvailable(p.getGender())) {
 				System.out.println("The bathroom is available");
 				available.wait();
@@ -61,7 +66,9 @@ public class Bathroom {
 			 
 			bathroom_users.remove(p);
 			System.out.println("person " + p.getName() + " get out");  
-			this.unavailable.signalAll();
+			
+			if (!this.isAvailable(p.getGender())) 
+				this.unavailable.signalAll();
 			
 		} catch (InterruptedException e) {
 			e.printStackTrace();
@@ -70,7 +77,7 @@ public class Bathroom {
 		}
 	} 
 	
-	public boolean isAvailable(Gender gender) {
+	public synchronized boolean isAvailable(Gender gender) {
 		return (this.sexOcupation == null ||
 				this.bathroom_users.isEmpty() ||
 				(this.sexOcupation.equals(gender) 

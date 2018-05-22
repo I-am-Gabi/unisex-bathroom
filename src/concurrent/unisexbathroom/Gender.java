@@ -1,4 +1,4 @@
-package concorrentes.imd.ufrn;
+package concurrent.unisexbathroom;
 
 import java.util.Random;
 
@@ -14,5 +14,5 @@ public enum Gender {
 	public static Gender getGender()  {
 		Random random = new Random();
 	    return values()[random.nextInt(values().length)];
-	}
+	} 
 }
