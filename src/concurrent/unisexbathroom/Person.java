@@ -2,6 +2,12 @@ package concurrent.unisexbathroom;
 
 import java.util.Random;
 
+/**
+ * Class to represents a thread Person.
+ * 
+ * @author Gabriela Cavalcante and Irene Ginani
+ * @version 20/05/2018
+ */
 public class Person extends Thread {
 	private Gender gender; 
 	private Bathroom bathroom;
@@ -13,31 +19,24 @@ public class Person extends Thread {
 		this.gender = Gender.getGender();
 		
 		Random random = new Random();
-		this.time =  1; //random.nextInt(1);
+		this.time = random.nextInt(10);
 	}
 	
 	@Override
 	public void run() {   
-
-		bathroom.getin(this);
-		
 		synchronized(bathroom){
-			try {
-				// Wait until can get in 
-				bathroom.wait();	
-				System.out.println("Get in the bathroom... " + Thread.currentThread().getName());
-			} catch (InterruptedException e) {
+			try { 
+				bathroom.getin(this);  
+				try {
+					Thread.sleep ((long) (this.time) * 1000);
+				} catch (InterruptedException e) { 
+					e.printStackTrace();
+				} 
+				bathroom.getout(this); 
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		}
-		
-		try {
-			Thread.sleep ((long) (this.time) * 1000);
-		} catch (InterruptedException e) { 
-			e.printStackTrace();
-		}
-		
-		bathroom.getout(this); 
+		} 
 	}
 
 	public Gender getGender() {

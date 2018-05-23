@@ -6,15 +6,20 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class Bathroom {
-	// TODO: define value in config file
+/**
+ * Class to represents the Bathroom. 
+ * Constant CAPACITY defines the total capacity of the bathoom.
+ * 
+ * @author Gabriela Cavalcante and Irene Ginani
+ * @version 20/05/2018
+ */
+public class Bathroom { 
 	private static final int CAPACITY = 5;
 	 
 	private Gender sexOcupation;
 	private List<Person> bathroom_users;
 	
-	private Lock block;
-	private Condition unavailable;
+	private Lock block; 
 	private Condition available;
 	
 	BathroomLine line;
@@ -25,30 +30,27 @@ public class Bathroom {
 		
 		this.line = line;
 		
-		this.block = new ReentrantLock();
-		this.unavailable = block.newCondition();
+		this.block = new ReentrantLock(); 
 		this.available = block.newCondition();
 	}
 	
 	public void getin(Person p) { 
 		block.lock();
 		try { 
-			// if the bathroom is full or if it's ocupated by oposite gender, people stop to get in 
-			while (!this.isAvailable(p.getGender())) {
-				System.out.println(p.getGender() + " person " + p.getName() + " tried get in");
-				System.out.println("The bathroom is full or unavailable");
-				
-				unavailable.await();
+			// if the bathroom is full or if it's occupied by the opposite gender, people stop to get in 
+			while (this.isUnavailable(p.getGender())) {
+				System.out.println(p.getGender() +" "+ p.getName() + " tried to get in");
+				System.out.println(" [status] The bathroom is full or unavailable");
+				System.out.println(" [person] " + bathroom_users.size());
+				available.await();
 			} 
 			
 			if (this.sexOcupation != p.getGender())
 				this.sexOcupation = p.getGender();
+			
 			bathroom_users.add(p);
-			System.out.println(p.getGender() + " person " + p.getName() + " get in");
-			
-			if (this.isAvailable(p.getGender())) 
-				available.signalAll();
-			
+			System.out.println(p.getGender() + " " + p.getName() + " get in");
+			System.out.println(" [person] " + bathroom_users.size()); 
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		} finally {
@@ -56,32 +58,22 @@ public class Bathroom {
 		}
 	}
 	
-	public synchronized void getout(Person p) { 
+	public void getout(Person p) { 
 		block.lock();
 		try { 
-			while (this.isAvailable(p.getGender())) {
-				System.out.println("The bathroom is available");
-				available.wait();
-			} 
-			 
 			bathroom_users.remove(p);
-			System.out.println("person " + p.getName() + " get out");  
+			System.out.println(p.getName() + " get out");  
 			
-			if (!this.isAvailable(p.getGender())) 
-				this.unavailable.signalAll();
-			
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+			this.available.signalAll();
 		} finally {
 			block.unlock();
 		}
 	} 
 	
-	public synchronized boolean isAvailable(Gender gender) {
-		return (this.sexOcupation == null ||
-				this.bathroom_users.isEmpty() ||
-				(this.sexOcupation.equals(gender) 
-						&& !this.isFull()));
+	public synchronized boolean isUnavailable(Gender gender) {
+		return (this.sexOcupation != null || 
+				!this.sexOcupation.equals(gender) || 
+				this.isFull());
 	}
 	
 	public boolean isFull() {

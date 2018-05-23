@@ -1,5 +1,12 @@
 package concurrent.unisexbathroom;
 
+
+/**
+ * [WIP] Bathroom line 
+ * 
+ * @author Gabriela Cavalcante and Irene Ginani
+ * @version 22/05/2018
+ */
 public class BathroomLine {
 	private Person line[];
 	

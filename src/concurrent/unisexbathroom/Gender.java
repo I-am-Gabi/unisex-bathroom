@@ -11,6 +11,10 @@ import java.util.Random;
 public enum Gender {
 	Woman, Men;
 
+	/**
+	 * Returns a random gender.
+	 * @return random gender.
+	 */
 	public static Gender getGender()  {
 		Random random = new Random();
 	    return values()[random.nextInt(values().length)];
