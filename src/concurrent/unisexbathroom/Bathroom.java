@@ -36,21 +36,20 @@ public class Bathroom {
 	 */
 	public void getin(Person p) { 
 		block.lock();
-		try { 
+		try {  
 			// if the bathroom is full or if it's occupied by the opposite gender, people stop to get in 
 			while (this.isUnavailable(p.getGender())) {
 				System.out.println(p.getGender() +" "+ p.getName() + " tried to get in");
 				System.out.println(" [status] The bathroom is full or unavailable");
-				System.out.println(" [person] " + bathroom_users.size());
-				available.await();
-			} 
-			
+				System.out.println(" [n] " + bathroom_users.size()); 
+				available.await(); 
+			}   
 			if (this.sexOcupation != p.getGender())
 				this.sexOcupation = p.getGender();
 			
 			bathroom_users.add(p);
 			System.out.println(p.getGender() + " " + p.getName() + " get in");
-			System.out.println(" [person] " + bathroom_users.size()); 
+			System.out.println(" [n] " + bathroom_users.size()); 
 
 			this.available.signalAll();
 		} catch (InterruptedException e) {
@@ -64,7 +63,7 @@ public class Bathroom {
 	 * Method to put the person out.
 	 * @param person
 	 */
-	public void getout(Person p) { 
+	public void getout(Person p) {  
 		block.lock();
 		try { 
 			bathroom_users.remove(p);

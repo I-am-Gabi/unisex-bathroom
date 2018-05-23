@@ -24,19 +24,15 @@ public class Person extends Thread {
 	
 	@Override
 	public void run() {   
-		synchronized(bathroom){
-			try { 
-				bathroom.getin(this);  
-				try {
-					Thread.sleep ((long) (this.time) * 1000);
-				} catch (InterruptedException e) { 
-					e.printStackTrace();
-				} 
-				bathroom.getout(this); 
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		} 
+		bathroom.getin(this); 
+		
+		try {
+			Thread.sleep ((long) (this.time) * 1000);
+		} catch (InterruptedException e) { 
+			e.printStackTrace();
+		}   
+		
+		bathroom.getout(this); 
 	}
 
 	public Gender getGender() {
