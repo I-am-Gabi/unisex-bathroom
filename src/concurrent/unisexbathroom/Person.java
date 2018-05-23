@@ -19,7 +19,7 @@ public class Person extends Thread {
 		this.gender = Gender.getGender();
 		
 		Random random = new Random();
-		this.time = random.nextInt(10);
+		this.time = random.nextInt(5);
 	}
 	
 	@Override

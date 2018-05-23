@@ -22,18 +22,18 @@ public class Bathroom {
 	private Lock block; 
 	private Condition available;
 	
-	BathroomLine line;
-	
-	public Bathroom(BathroomLine line) { 
+	public Bathroom() { 
 		this.sexOcupation = null;
-		this.bathroom_users = new ArrayList<Person>();
-		
-		this.line = line;
+		this.bathroom_users = new ArrayList<Person>(); 
 		
 		this.block = new ReentrantLock(); 
 		this.available = block.newCondition();
 	}
 	
+	/**
+	 * Put a person inside the bethroom case it's available
+	 * @param person 
+	 */
 	public void getin(Person p) { 
 		block.lock();
 		try { 
@@ -51,6 +51,8 @@ public class Bathroom {
 			bathroom_users.add(p);
 			System.out.println(p.getGender() + " " + p.getName() + " get in");
 			System.out.println(" [person] " + bathroom_users.size()); 
+
+			this.available.signalAll();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		} finally {
@@ -58,6 +60,10 @@ public class Bathroom {
 		}
 	}
 	
+	/**
+	 * Method to put the person out.
+	 * @param person
+	 */
 	public void getout(Person p) { 
 		block.lock();
 		try { 
@@ -70,12 +76,22 @@ public class Bathroom {
 		}
 	} 
 	
-	public synchronized boolean isUnavailable(Gender gender) {
-		return (this.sexOcupation != null || 
-				!this.sexOcupation.equals(gender) || 
-				this.isFull());
+	/**
+	 * Method to check if the bathroom is unabailable to a specifical gender.
+	 * Return true if the bathroom is full or if it's occupated by the opposite gender.
+	 * @param gender
+	 * @return bathroom status
+	 */
+	public boolean isUnavailable(Gender gender) {
+		return (this.sexOcupation != null && this.isFull() || 
+				(!gender.equals(this.sexOcupation) 
+						&& this.bathroom_users.size() != 0));
 	}
 	
+	/**
+	 * Check is the bathroom is full.
+	 * @return true if the bathroom is full.
+	 */
 	public boolean isFull() {
 		return this.bathroom_users.size() == CAPACITY;
 	}
