@@ -12,8 +12,8 @@ public class Main {
 	private static final int total = 10;
 
 	public static void main(String[] args) {  
-		// BathroomLine line = new BathroomLine(total);
-		Bathroom bathroom = new Bathroom();
+		BathroomLine line = new BathroomLine(total);
+		Bathroom bathroom = new Bathroom(line);
 	    Person[] folk = new Person[total];
 	    
 	    for (int i = 0; i < total; i++) { 

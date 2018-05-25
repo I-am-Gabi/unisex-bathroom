@@ -24,14 +24,18 @@ public class Person extends Thread {
 	
 	@Override
 	public void run() {   
-		bathroom.getin(this); 
+		try {
+			bathroom.getin(this);
+		} catch (InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} 
 		
 		try {
 			Thread.sleep ((long) (this.time) * 1000);
 		} catch (InterruptedException e) { 
 			e.printStackTrace();
 		}   
-		
 		bathroom.getout(this); 
 	}
 

@@ -18,45 +18,34 @@ public class Bathroom {
 	 
 	private Gender sexOcupation;
 	private List<Person> bathroom_users;
+	private BathroomLine line;
 	
-	private Lock block; 
-	private Condition available;
+	private Lock block;  
 	
-	public Bathroom() { 
+	public Bathroom(BathroomLine line) { 
 		this.sexOcupation = null;
 		this.bathroom_users = new ArrayList<Person>(); 
+		this.line = line;
 		
-		this.block = new ReentrantLock(); 
-		this.available = block.newCondition();
+		this.block = new ReentrantLock();  
 	}
 	
 	/**
 	 * Put a person inside the bethroom case it's available
 	 * @param person 
 	 */
-	public void getin(Person p) { 
-		block.lock();
-		try {  
-			// if the bathroom is full or if it's occupied by the opposite gender, people stop to get in 
-			while (this.isUnavailable(p.getGender())) {
-				System.out.println(p.getGender() +" "+ p.getName() + " tried to get in");
-				System.out.println(" [status] The bathroom is full or unavailable");
-				System.out.println(" [n] " + bathroom_users.size()); 
-				available.await(); 
-			}   
-			if (this.sexOcupation != p.getGender())
-				this.sexOcupation = p.getGender();
-			
-			bathroom_users.add(p);
-			System.out.println(p.getGender() + " " + p.getName() + " get in");
-			System.out.println(" [n] " + bathroom_users.size()); 
-
-			this.available.signalAll();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		} finally {
-			block.unlock();
-		}
+	public void getin(Person p) throws InterruptedException {  
+		// if the bathroom is full or if it's occupied by the opposite gender, people stop to get in 
+		while (this.isUnavailable(p.getGender())) {
+			System.out.println(p.getGender() + " " + p.getName() + " tried to get in | [n] " + bathroom_users.size()); 
+			if (!line.contains(p)) line.await(p);  
+		}   
+		if (this.sexOcupation != p.getGender())
+			this.sexOcupation = p.getGender();
+		
+		bathroom_users.add(p);
+		System.out.println(p.getGender() + " " + p.getName() + " get in | [n] " + bathroom_users.size()); 
+		line.notifyThread(); 
 	}
 	
 	/**
@@ -67,9 +56,9 @@ public class Bathroom {
 		block.lock();
 		try { 
 			bathroom_users.remove(p);
-			System.out.println(p.getName() + " get out");  
-			
-			this.available.signalAll();
+			System.out.println(p.getName() + " get out | [n] " + bathroom_users.size());  
+			 
+			line.notifyThread(); 
 		} finally {
 			block.unlock();
 		}
@@ -82,9 +71,9 @@ public class Bathroom {
 	 * @return bathroom status
 	 */
 	public boolean isUnavailable(Gender gender) {
-		return (this.sexOcupation != null && this.isFull() || 
-				(!gender.equals(this.sexOcupation) 
-						&& this.bathroom_users.size() != 0));
+		return (this.sexOcupation != null && this.isFull() ||
+				(this.line.hasPerson() && this.bathroom_users.size() != 0) ||
+				(!gender.equals(this.sexOcupation) && this.bathroom_users.size() != 0));
 	}
 	
 	/**
