@@ -1,5 +1,7 @@
 package concurrent.unisexbathroom;
 
+import java.util.LinkedList;
+import java.util.Queue;
 
 /**
  * [WIP] Bathroom line 
@@ -8,26 +10,37 @@ package concurrent.unisexbathroom;
  * @version 22/05/2018
  */
 public class BathroomLine {
-	private Person line[];
+	private Queue<Person> line;
 	
-	public BathroomLine (int n) {
-		// TODO: dinamico
-		this.line = new Person[n];
-	}
+	public BathroomLine (int n) { 
+		this.line = new LinkedList<>();
+	} 
 	
-	public void wait(int target) {
-		synchronized (line[target]) {
+	public void await(Person p) {
+		line.add(p); 
+		synchronized (p) { 
 			try {
-				line[target].wait();
+				p.wait();
 			} catch (InterruptedException e) { 
 				e.printStackTrace();
+			} 
+		}
+	}
+	
+	public void notifyThread() { 
+		Person p = line.poll();
+		if (p != null) {
+			synchronized (p) {
+				p.notify();
 			}
 		}
 	}
 	
-	public void notify(int target) {
-		synchronized (line[target]) {
-			line[target].notify();
-		}
+	public boolean contains(Person p) {
+		return line.contains(p);
+	}
+
+	public boolean hasPerson() {
+		return !line.isEmpty();
 	}
 }
