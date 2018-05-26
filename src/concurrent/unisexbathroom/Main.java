@@ -8,11 +8,10 @@ package concurrent.unisexbathroom;
  * @version 20/05/2018
  */
 public class Main {
-
 	private static final int total = 10;
 
 	public static void main(String[] args) {  
-		BathroomLine line = new BathroomLine(total);
+		BathroomLine line = new BathroomLine();
 		Bathroom bathroom = new Bathroom(line);
 	    Person[] folk = new Person[total];
 	    

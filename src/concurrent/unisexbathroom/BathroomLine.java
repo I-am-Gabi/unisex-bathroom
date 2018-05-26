@@ -4,18 +4,22 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 /**
- * [WIP] Bathroom line 
+ * Class to represents the bathroom line.
  * 
  * @author Gabriela Cavalcante and Irene Ginani
  * @version 22/05/2018
  */
 public class BathroomLine {
-	private Queue<Person> line;
+	private Queue<Person> line; 
 	
-	public BathroomLine (int n) { 
+	public BathroomLine () { 
 		this.line = new LinkedList<>();
 	} 
 	
+	/**
+	 * Method to put a person in the bathroom line.
+	 * @param p person
+	 */
 	public void await(Person p) {
 		line.add(p); 
 		synchronized (p) { 
@@ -27,6 +31,9 @@ public class BathroomLine {
 		}
 	}
 	
+	/**
+	 * Method to wakeup a person, and put her in the bathroom.
+	 */
 	public void notifyThread() { 
 		Person p = line.poll();
 		if (p != null) {
@@ -34,12 +41,12 @@ public class BathroomLine {
 				p.notify();
 			}
 		}
-	}
-	
-	public boolean contains(Person p) {
-		return line.contains(p);
-	}
+	} 
 
+	/**
+	 * Check if the bathroom line has someone
+	 * @return true if the line isn't empty
+	 */
 	public boolean hasPerson() {
 		return !line.isEmpty();
 	}

@@ -26,8 +26,7 @@ public class Person extends Thread {
 	public void run() {   
 		try {
 			bathroom.getin(this);
-		} catch (InterruptedException e1) {
-			// TODO Auto-generated catch block
+		} catch (InterruptedException e1) { 
 			e1.printStackTrace();
 		} 
 		
@@ -36,9 +35,14 @@ public class Person extends Thread {
 		} catch (InterruptedException e) { 
 			e.printStackTrace();
 		}   
+		
 		bathroom.getout(this); 
 	}
 
+	/**
+	 * Return the person gender 
+	 * @return
+	 */
 	public Gender getGender() {
 		return gender;
 	} 

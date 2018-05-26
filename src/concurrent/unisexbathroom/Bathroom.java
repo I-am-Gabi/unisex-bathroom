@@ -19,47 +19,54 @@ public class Bathroom {
 	private List<Person> bathroom_users;
 	private BathroomLine line;
 	
-	private Lock block;  
+	private Lock blockout;
+	private Lock blockin;
 	
 	public Bathroom(BathroomLine line) { 
 		this.sexOcupation = null;
 		this.bathroom_users = new ArrayList<Person>(); 
 		this.line = line;
 		
-		this.block = new ReentrantLock();  
+		this.blockout = new ReentrantLock(); 
+		this.blockin = new ReentrantLock(); 
 	}
 	
 	/**
 	 * Put a person inside the bethroom case it's available
-	 * @param person 
+	 * @param person that will get in
 	 */
-	public void getin(Person p) throws InterruptedException {  
+	public void getin(Person p) throws InterruptedException { 
 		// if the bathroom is full or if it's occupied by the opposite gender, people stop to get in 
 		while (this.isUnavailable(p.getGender())) {
-			System.out.println(p.getGender() + " " + p.getName() + " tried to get in | [n] " + bathroom_users.size()); 
-			if (!line.contains(p)) line.await(p);  
+			System.out.println(p.getGender() + " " + p.getName() + " tried to get in | [people in the bathroom] " + bathroom_users.size()); 
+			blockin.lock();
+			line.await(p); 
+			blockin.unlock();
 		}   
+ 
 		if (this.sexOcupation != p.getGender())
 			this.sexOcupation = p.getGender();
 		
 		bathroom_users.add(p);
-		System.out.println(p.getGender() + " " + p.getName() + " get in | [n] " + bathroom_users.size()); 
+		System.out.println(p.getGender() + " " + p.getName() + " get in | [people in the bathroom] " + bathroom_users.size()); 
 		line.notifyThread(); 
 	}
 	
 	/**
 	 * Method to put the person out.
-	 * @param person
+	 * @param person that will get out
 	 */
 	public void getout(Person p) {  
-		block.lock();
+		blockout.lock();
 		try { 
 			bathroom_users.remove(p);
-			System.out.println(p.getName() + " get out | [n] " + bathroom_users.size());  
+			System.out.println(" >> " + p.getName() + " get out | [people in the bathroom] " + bathroom_users.size());  
 			 
-			line.notifyThread(); 
+			// notify the next person that the someone get out 
+			if (this.bathroom_users.isEmpty())
+				line.notifyThread(); 
 		} finally {
-			block.unlock();
+			blockout.unlock();
 		}
 	} 
 	
